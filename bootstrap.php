@@ -69,7 +69,7 @@ function __autoload($className) {
         require_once('library/' . strtolower($className) . '.php');
     } else {
         //Error not implemented
-        return new View('page/505.php', array());
+        return new View('page/500.php', array());
     }
 }
 
