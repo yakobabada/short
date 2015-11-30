@@ -12,7 +12,8 @@ Download and Installation
 - using github to projects directory
   - `git clone https://github.com/yakobabada/short.git`
 
-- create database `shortenUrl` and update connection parameters in `config/database.php` file
+- create database `shortenUrl` and update connection parameters in `config/database.php` file.
+- import into your database using `shortenUrl.sql`.
 
 Web server setup
 ----------------
