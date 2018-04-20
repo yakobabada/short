@@ -1,26 +1,44 @@
-#CSV Import
+Shorten url
+=======================
 
-##Introduction
+Introduction
+------------
+- The application was created from scratch and structured using mvc and frontController design pattern.
+- Simply, it creates short url from long url and  manager redirect operation from short url to long url.
 
-- The application was created from scratch and structured using command and frontController design pattern.
-- program should run once per minute using a system crontab . When run, it should
-  discover any CSV files in the “uploaded” directory, parse the rows in the file, insert their contents
-  into a MySQL database, and then move each CSV file to the “processed” directory.
 
-## Requirement:
-
-PHP 7, mysql 5.7
-
-##Download and Installation
-
+Download and Installation
+--------------------------- 
 - using github to projects directory
-  - `git clone https://github.com/yakobabada/import.git`
-  - `cd import/`
+  - `git clone https://github.com/yakobabada/short.git`
 
-- create database `infinity` and update connection parameters in `config/database.php` file.
-- import into your database using `infinity.sql`.
+- create database `shortenUrl` and update connection parameters in `config/database.php` file.
+- import into your database using `shortenUrl.sql`.
 
-##Start import CSVs
+Web server setup
+----------------
 
-- Run the command in the directory 
-  - `php index.php importFile`
+### Apache setup
+
+To setup apache, setup a virtual host to point to the public/ directory of the
+project and you should be ready to go! It should look something like below:
+
+    <VirtualHost *:80>
+        ServerName short.localhost
+        DocumentRoot /path/to/short
+        <Directory /path/to/short>
+            DirectoryIndex index.php
+            AllowOverride All
+            Order allow,deny
+            Allow from all
+            <IfModule mod_authz_core.c>
+            Require all granted
+            </IfModule>
+        </Directory>
+    </VirtualHost>
+
+Documentation
+----------------
+- Form to create short url: 
+  - 'yourdomain.com/shorten'.
+- Use output short url to make redirection.

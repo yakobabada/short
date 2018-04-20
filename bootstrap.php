@@ -1,44 +1,81 @@
 <?php
 
-function callHook($arg) {
+function callHook() {
+    $url = $_GET['url'];
 
-    if (!isset($arg[1])) {
-        echo 'You haven\'t chose the command';
-        return;
+    //Matching url param from route list
+    $routes = getRoute();
+    $controllerMatch = '';
+    $actionMatch = '';
+    foreach ($routes as $route) {
+        $routeUrl = $route['url'];
+        if (preg_match("/^$routeUrl$/", $url, $match)) {
+            $controllerMatch = $route['controller'];
+            $actionMatch = $route['action'];
+            if (isset($match[1])) {
+                setGetParams($match, $route['params']);
+            }
+            break;
+        }
     }
 
-    $commandName = $arg[1];
-    $commandClass = $commandName . 'Command';
+    //Create actual action and dispatcher names to be called
+    $urlArray   = explode("/", $url);
+    $controller = $controllerMatch;
+    $action     = $actionMatch;
+    $action    .= 'Action';
 
+    $controller  = ucwords($controller);
+    $controller .= 'Controller';
+    $dispatch = new $controller();
 
-    $command = new $commandClass();
-    $command->execute();
+    if (method_exists($dispatch, $action)) {
+        echo call_user_func_array(array($dispatch, $action), array());
+    } else {
+        //404
+        return new View('page/404.php', array());
+    }
 
 }
 
 function callConstants() {
-    require_once('Config/database.php');
-    require_once('Config/default.php');
+    require_once('config/database.php');
+    require_once('config/default.php');
 }
 
-function __autoload($className) {
-    if (file_exists('Command/' . strtolower($className) . '.php')) {
-        require_once('Command/' . strtolower($className) . '.php');
-    } elseif (file_exists('Model/' . strtolower($className) . '.php')) {
-        require_once('Model/' . strtolower($className) . '.php');
-    } elseif (file_exists('Service/' . strtolower($className) . '.php')) {
-        require_once('Service/' . strtolower($className) . '.php');
-    } elseif (file_exists('Service/CsvReader/' . strtolower($className) . '.php')) {
-        require_once('Service/CsvReader/' . strtolower($className) . '.php');
-    } elseif (file_exists('Service/CsvValidator/' . strtolower($className) . '.php')) {
-        require_once('Service/CsvValidator/' . strtolower($className) . '.php');
-    } elseif(file_exists('Manager/' . strtolower($className) . '.php')) {
-        require_once('Manager/' . strtolower($className) . '.php');
-    } else {
-        //Error not implemented
-        return new View('page/505.php', array());
+function setGetParams($match, $params) {
+    $parmNo = 1;
+    foreach ($params as $param) {
+        if (isset($match[$parmNo])) {
+            $_GET[$param] = $match[$parmNo];
+            $parmNo++;
+        } else {
+            break;
+        }        
     }
 }
 
+function __autoload($className) {
+
+    if (file_exists('controller/' . strtolower($className) . '.php')) {
+        require_once('controller/' . strtolower($className) . '.php');
+    } elseif (file_exists('system/core/' . strtolower($className) . '.php')) {
+        require_once('system/core/' . strtolower($className) . '.php');
+    } elseif (file_exists('model/' . strtolower($className) . '.php')) {
+        require_once('model/' . strtolower($className) . '.php');
+    } elseif (file_exists('service/' . strtolower($className) . '.php')) {
+        require_once('service/' . strtolower($className) . '.php');
+    } elseif(file_exists('library/' . strtolower($className) . '.php')) {
+        require_once('library/' . strtolower($className) . '.php');
+    } else {
+        //Error not implemented
+        return new View('page/500.php', array());
+    }
+}
+
+function getRoute() {
+    return require_once('config/router.php');
+}
+
 callConstants();
-callHook($argv);
+callHook();
